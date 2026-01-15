@@ -1,23 +1,82 @@
-# Getting Started with Create React App
+# ✈️ Flight Search Engine
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A responsive, real-time flight search application built with React and Material-UI. Features live-updating price graphs, intelligent filtering, and a modern dark-themed UI.
 
-## Available Scripts
+## 🚀 Live Demo
 
-In the project directory, you can run:
+Deploy to Vercel: [Add link after deployment]
 
-### `npm start`
+## 📸 Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### ✨ Core Functionality
+- **Real-time Search Form**: Origin, destination, dates, passengers, cabin class
+- **Advanced Filtering**: 
+  - Price range slider with min/max calculation
+  - Stops filter (0, 1, 2, 3+ stops)
+  - Airline selector with dynamic options
+  - AND logic (all filters apply simultaneously)
+- **Live Price Graph**: Recharts line chart updates instantly when filters change
+- **Responsive Design**: Fully functional on mobile (< 768px) and desktop
+- **Modern UI**: Material-UI components with custom dark theme
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 💻 Tech Stack
 
-### `npm test`
+- **React 19.1.1**: Latest React with hooks
+- **Material-UI 7.3.1**: UI components with dark theme
+- **Recharts 2.12.0**: Data visualization
+- **Context API**: Global state management with useMemo optimization
+- **date-fns**: Date handling utilities
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 📦 Installation & Quick Start
+
+```bash
+# Clone and install
+git clone https://github.com/[username]/spotter-flight-search.git
+cd spotter-flight-search
+npm install
+
+# Start development server
+npm start
+
+# Build for production
+npm run build
+```
+
+## 🏛️ Project Architecture
+
+**Global State Management** (FlightContext.js):
+- 20 mock flights with varied prices ($280-$2,500) and stops (0-3)
+- Automatic filtering with AND logic
+- useMemo optimization for performance
+
+**Key Components**:
+- `FilterPanel.jsx`: Price/Stops/Airline filters
+- `PriceGraph.jsx`: Live Recharts visualization  
+- `FlightResults.jsx`: Results layout with sidebar
+- `FlightSearch.jsx`: Search form with date pickers
+
+## 🎯 Challenge Requirements - ALL COMPLETE ✅
+
+| Feature | Status |
+|---------|--------|
+| Search & Results Form | ✅ |
+| Live Price Graph | ✅ |
+| Complex Filtering (Price + Stops + Airline) | ✅ |
+| Real-time Updates | ✅ |
+| Responsive Design | ✅ |
+
+## 🚀 Deployment
+
+Ready for Vercel with `vercel.json` configuration.
+
+```bash
+vercel deploy
+```
+
+---
+
+**Built with ❤️ using React, Material-UI, and Recharts**
+
 
 ### `npm run build`
 

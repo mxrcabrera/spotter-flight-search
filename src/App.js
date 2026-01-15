@@ -25,13 +25,12 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: [
-      'Google Sans',
       'Roboto',
       'Arial',
       'sans-serif',
     ].join(','),
     h6: {
-      fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+      fontFamily: 'Roboto, Arial, sans-serif',
       fontWeight: 400,
     },
     body1: {
@@ -54,7 +53,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+          fontFamily: 'Roboto, Arial, sans-serif',
         },
       },
     },
@@ -62,7 +61,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          fontFamily: 'Google Sans, Roboto, Arial, sans-serif',
+          fontFamily: 'Roboto, Arial, sans-serif',
         },
       },
     },
@@ -82,7 +81,6 @@ function App() {
   const [searchTrigger, setSearchTrigger] = useState(0);
 
   const handleSearch = (searchParams) => {
-    console.log('App: Search triggered with params:', searchParams);
     setSearchTrigger(prev => prev + 1);
   };
 

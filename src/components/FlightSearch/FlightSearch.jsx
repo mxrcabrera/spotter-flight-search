@@ -1,227 +1,180 @@
-import { useState } from 'react';
-import { Button, Typography, TextField, Box, Stack } from '@mui/material';
-import { SwapHoriz, KeyboardArrowDown } from '@mui/icons-material';
+import React, { useState } from 'react';
+import {
+  Box,
+  Paper,
+  TextField,
+  Button,
+  ToggleButton,
+  ToggleButtonGroup,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { useFlightContext } from '../../context/FlightContext';
 
-const FlightSearch = ({ onSearch }) => {
-  const { searchParams } = useFlightContext();
-  const [localParams, setLocalParams] = useState(searchParams);
+const FlightSearch = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { updateSearchParams } = useFlightContext();
+
+  const [tripType, setTripType] = useState('roundtrip');
+  const [origin, setOrigin] = useState('JFK');
+  const [destination, setDestination] = useState('LAX');
+  const [departDate, setDepartDate] = useState('2025-02-15');
+  const [returnDate, setReturnDate] = useState('2025-02-22');
+  const [passengers, setPassengers] = useState(1);
+  const [cabinClass, setCabinClass] = useState('economy');
+
+  const handleSwapCities = () => {
+    const temp = origin;
+    setOrigin(destination);
+    setDestination(temp);
+  };
+
+  const handleSearch = () => {
+    updateSearchParams({
+      origin,
+      destination,
+      departDate,
+      returnDate: tripType === 'roundtrip' ? returnDate : null,
+      passengers,
+      cabinClass
+    });
+  };
 
   return (
-    <Box sx={{ 
-      maxWidth: '1200px', 
-      mx: 'auto', 
-      px: 2, 
-      mb: 2,
-      position: 'relative'
-    }}>
-      {/* Top Row - Dropdowns */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 2
-      }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            endIcon={<KeyboardArrowDown />}
-            sx={{
-              color: '#e8eaed',
-              border: '1px solid #5f6368',
-              borderRadius: '4px',
-              textTransform: 'none',
-              fontSize: '14px',
-              px: 2,
-              py: 0.5,
-              minHeight: '36px',
-              '&:hover': { borderColor: '#8ab4f8' }
-            }}
-          >
-            Round trip
-          </Button>
-          <Button
-            endIcon={<KeyboardArrowDown />}
-            sx={{
-              color: '#e8eaed',
-              border: '1px solid #5f6368',
-              borderRadius: '4px',
-              textTransform: 'none',
-              fontSize: '14px',
-              px: 2,
-              py: 0.5,
-              minHeight: '36px',
-              '&:hover': { borderColor: '#8ab4f8' }
-            }}
-          >
-            1
-          </Button>
-          <Button
-            endIcon={<KeyboardArrowDown />}
-            sx={{
-              color: '#e8eaed',
-              border: '1px solid #5f6368',
-              borderRadius: '4px',
-              textTransform: 'none',
-              fontSize: '14px',
-              px: 2,
-              py: 0.5,
-              minHeight: '36px',
-              '&:hover': { borderColor: '#8ab4f8' }
-            }}
-          >
-            Economy
-          </Button>
-        </Box>
+    <Paper
+      elevation={3}
+      sx={{
+        p: 3,
+        borderRadius: 3,
+        backgroundColor: 'background.paper'
+      }}
+    >
+      {/* Trip Type Toggle */}
+      <Box sx={{ mb: 3 }}>
+        <ToggleButtonGroup
+          value={tripType}
+          exclusive
+          onChange={(e, val) => val && setTripType(val)}
+          size="small"
+        >
+          <ToggleButton value="roundtrip">Round trip</ToggleButton>
+          <ToggleButton value="oneway">One way</ToggleButton>
+        </ToggleButtonGroup>
       </Box>
 
-      {/* Search Form */}
-      <Stack 
-        direction="row" 
-        spacing={1}
-        alignItems="center"
+      {/* Search Fields */}
+      <Box
         sx={{
-          maxWidth: '1200px',
-          mx: 'auto',
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: 2,
+          alignItems: 'center',
+          flexWrap: 'wrap'
         }}
       >
-        {/* From */}
-        <Box sx={{ 
-          flex: 1, 
-          backgroundColor: '#202124',
-          border: '1px solid #5f6368',
-          borderRadius: '4px',
-          p: 1.5,
-          position: 'relative'
-        }}>
-          <Typography sx={{ 
-            color: '#9aa0a6', 
-            fontSize: '12px', 
-            mb: 0.5 
-          }}>
-            From
-          </Typography>
+        {/* Origin */}
+        <TextField
+          label="From"
+          value={origin}
+          onChange={(e) => setOrigin(e.target.value.toUpperCase())}
+          placeholder="JFK"
+          sx={{ flex: 1, minWidth: 120 }}
+          inputProps={{ maxLength: 3 }}
+        />
+
+        {/* Swap Button */}
+        <Button
+          onClick={handleSwapCities}
+          sx={{ minWidth: 40, p: 1 }}
+          variant="outlined"
+        >
+          <SwapHorizIcon />
+        </Button>
+
+        {/* Destination */}
+        <TextField
+          label="To"
+          value={destination}
+          onChange={(e) => setDestination(e.target.value.toUpperCase())}
+          placeholder="LAX"
+          sx={{ flex: 1, minWidth: 120 }}
+          inputProps={{ maxLength: 3 }}
+        />
+
+        {/* Depart Date */}
+        <TextField
+          label="Depart"
+          type="date"
+          value={departDate}
+          onChange={(e) => setDepartDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ flex: 1, minWidth: 140 }}
+        />
+
+        {/* Return Date */}
+        {tripType === 'roundtrip' && (
           <TextField
-            variant="standard"
-            placeholder="City or airport (e.g., JFK)"
-            value={localParams.origin}
-            onChange={(e) => setLocalParams(prev => ({...prev, origin: e.target.value}))}
-            InputProps={{
-              disableUnderline: true,
-              sx: {
-                color: '#e8eaed',
-                fontSize: '16px',
-                '& input::placeholder': { color: '#9aa0a6', opacity: 1 }
-              }
-            }}
-            fullWidth
+            label="Return"
+            type="date"
+            value={returnDate}
+            onChange={(e) => setReturnDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ flex: 1, minWidth: 140 }}
           />
-          
-          {/* Swap Button */}
-          <Box sx={{
-            position: 'absolute',
-            right: -17,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 1
-          }}>
-            <Box sx={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              backgroundColor: '#3c4043',
-              border: '1px solid #5f6368',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              '&:hover': { backgroundColor: '#444746' }
-            }}>
-              <SwapHoriz sx={{ color: '#e8eaed', fontSize: '18px' }} />
-            </Box>
-          </Box>
-        </Box>
+        )}
 
-        {/* To */}
-        <Box sx={{ 
-          flex: 1, 
-          backgroundColor: '#202124',
-          border: '1px solid #5f6368',
-          borderRadius: '4px',
-          p: 1.5
-        }}>
-          <Typography sx={{ 
-            color: '#9aa0a6', 
-            fontSize: '12px', 
-            mb: 0.5 
-          }}>
-            To
-          </Typography>
-          <TextField
-            variant="standard"
-            placeholder="City or airport (e.g., JFK)"
-            value={localParams.destination}
-            onChange={(e) => setLocalParams(prev => ({...prev, destination: e.target.value}))}
-            InputProps={{
-              disableUnderline: true,
-              sx: {
-                color: '#e8eaed',
-                fontSize: '16px',
-                '& input::placeholder': { color: '#9aa0a6', opacity: 1 }
-              }
-            }}
-            fullWidth
-          />
-        </Box>
+        {/* Passengers */}
+        <FormControl sx={{ minWidth: 100 }}>
+          <InputLabel>Passengers</InputLabel>
+          <Select
+            value={passengers}
+            label="Passengers"
+            onChange={(e) => setPassengers(e.target.value)}
+          >
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+              <MenuItem key={num} value={num}>{num}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-        {/* Departs */}
-        <Box sx={{ 
-          flex: 1, 
-          backgroundColor: '#202124',
-          border: '1px solid #5f6368',
-          borderRadius: '4px',
-          p: 1.5,
-          cursor: 'pointer'
-        }}>
-          <Typography sx={{ 
-            color: '#9aa0a6', 
-            fontSize: '12px', 
-            mb: 0.5 
-          }}>
-            Departs
-          </Typography>
-          <Typography sx={{ 
-            color: '#e8eaed', 
-            fontSize: '16px' 
-          }}>
-            Fri, Aug 8
-          </Typography>
-        </Box>
+        {/* Cabin Class */}
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel>Class</InputLabel>
+          <Select
+            value={cabinClass}
+            label="Class"
+            onChange={(e) => setCabinClass(e.target.value)}
+          >
+            <MenuItem value="economy">Economy</MenuItem>
+            <MenuItem value="premium">Premium Economy</MenuItem>
+            <MenuItem value="business">Business</MenuItem>
+            <MenuItem value="first">First</MenuItem>
+          </Select>
+        </FormControl>
 
-        {/* Return */}
-        <Box sx={{ 
-          flex: 1, 
-          backgroundColor: '#202124',
-          border: '1px solid #5f6368',
-          borderRadius: '4px',
-          p: 1.5,
-          cursor: 'pointer'
-        }}>
-          <Typography sx={{ 
-            color: '#9aa0a6', 
-            fontSize: '12px', 
-            mb: 0.5 
-          }}>
-            Return
-          </Typography>
-          <Typography sx={{ 
-            color: '#e8eaed', 
-            fontSize: '16px' 
-          }}>
-            Fri, Aug 15
-          </Typography>
-        </Box>
-      </Stack>
-    </Box>
+        {/* Search Button */}
+        <Button
+          variant="contained"
+          onClick={handleSearch}
+          startIcon={<SearchIcon />}
+          sx={{
+            height: 56,
+            px: 4,
+            borderRadius: 2,
+            minWidth: isMobile ? '100%' : 'auto'
+          }}
+        >
+          Search
+        </Button>
+      </Box>
+    </Paper>
   );
 };
 

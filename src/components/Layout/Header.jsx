@@ -14,7 +14,7 @@ const Header = () => {
         paddingLeft: 2,
         paddingRight: 2 
       }}>
-        {/* Left side - Google and navigation */}
+        {/* Left side - Spotter Flight Search and navigation */}
         <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
           <Typography 
             component="div" 
@@ -26,7 +26,7 @@ const Header = () => {
               mr: 3
             }}
           >
-            Google
+            Spotter Flight Search
           </Typography>
           
           {/* Navigation tabs */}

@@ -1,7 +1,9 @@
 import { AppBar, Toolbar, Typography, IconButton, Button, Box } from '@mui/material';
 import { Apps, AccountCircle, DarkMode, LightMode } from '@mui/icons-material';
+import { useThemeMode } from '../../context/ThemeContext';
 
-const Header = ({ mode, setMode }) => {
+const Header = () => {
+  const { mode, setMode } = useThemeMode();
   return (
     <AppBar position="static" sx={{ 
       backgroundColor: mode === 'dark' ? '#202124' : '#ffffff',

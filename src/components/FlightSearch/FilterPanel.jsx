@@ -1,9 +1,10 @@
-import { Box, Slider, FormControlLabel, Checkbox, Typography, Stack, Card, Button } from '@mui/material';
+import { Box, Slider, FormControlLabel, Checkbox, Typography, Stack, Card, Button, useTheme } from '@mui/material';
 import { useMemo } from 'react';
 import { useFlightContext } from '../../context/FlightContext';
 
 const FilterPanel = () => {
   const { flights, filters, updateFilters, resetFilters } = useFlightContext();
+  const theme = useTheme();
 
   // Calcular valores únicos de aerolíneas dinámicamente
   const uniqueAirlines = useMemo(() => {
@@ -48,8 +49,8 @@ const FilterPanel = () => {
 
   return (
     <Card sx={{
-      backgroundColor: '#303134',
-      border: '1px solid #3c4043',
+      backgroundColor: theme.palette.background.paper,
+      border: `1px solid ${theme.palette.divider}`,
       p: 2,
       boxShadow: 'none',
       height: 'fit-content',
@@ -57,14 +58,14 @@ const FilterPanel = () => {
       top: 20
     }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ color: '#e8eaed', fontWeight: 600 }}>
+        <Typography variant="h6" sx={{ color: theme.palette.text.primary, fontWeight: 600 }}>
           Filters
         </Typography>
         <Button
           size="small"
           onClick={handleResetFilters}
           sx={{
-            color: '#8ab4f8',
+            color: theme.palette.primary.main,
             fontSize: '12px',
             textTransform: 'none',
             padding: 0,
@@ -77,7 +78,7 @@ const FilterPanel = () => {
 
       {/* Price Filter */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle2" sx={{ color: '#9aa0a6', mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary, mb: 1 }}>
           Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
         </Typography>
         <Slider
@@ -87,15 +88,15 @@ const FilterPanel = () => {
           value={filters.priceRange}
           onChange={handlePriceChange}
           sx={{
-            color: '#8ab4f8',
+            color: theme.palette.primary.main,
             '& .MuiSlider-thumb': {
-              backgroundColor: '#8ab4f8',
+              backgroundColor: theme.palette.primary.main,
             },
             '& .MuiSlider-track': {
-              backgroundColor: '#8ab4f8',
+              backgroundColor: theme.palette.primary.main,
             },
             '& .MuiSlider-rail': {
-              backgroundColor: '#3c4043',
+              backgroundColor: theme.palette.divider,
             }
           }}
         />
@@ -103,7 +104,7 @@ const FilterPanel = () => {
 
       {/* Stops Filter */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle2" sx={{ color: '#9aa0a6', mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary, mb: 1 }}>
           Number of Stops
         </Typography>
         <Stack spacing={0.5}>
@@ -115,13 +116,13 @@ const FilterPanel = () => {
                   checked={filters.stops.includes(stops)}
                   onChange={() => handleStopsChange(stops)}
                   sx={{
-                    color: '#9aa0a6',
-                    '&.Mui-checked': { color: '#8ab4f8' }
+                    color: theme.palette.text.secondary,
+                    '&.Mui-checked': { color: theme.palette.primary.main }
                   }}
                 />
               }
               label={
-                <Typography sx={{ color: '#e8eaed', fontSize: '14px' }}>
+                <Typography sx={{ color: theme.palette.text.primary, fontSize: '14px' }}>
                   {stops === 0 ? 'Nonstop' : `${stops} Stop${stops > 1 ? 's' : ''}`}
                 </Typography>
               }
@@ -132,7 +133,7 @@ const FilterPanel = () => {
 
       {/* Airlines Filter */}
       <Box>
-        <Typography variant="subtitle2" sx={{ color: '#9aa0a6', mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary, mb: 1 }}>
           Airlines ({uniqueAirlines.length})
         </Typography>
         <Stack spacing={0.5}>
@@ -144,13 +145,13 @@ const FilterPanel = () => {
                   checked={filters.airlines.includes(airline)}
                   onChange={() => handleAirlineChange(airline)}
                   sx={{
-                    color: '#9aa0a6',
-                    '&.Mui-checked': { color: '#8ab4f8' }
+                    color: theme.palette.text.secondary,
+                    '&.Mui-checked': { color: theme.palette.primary.main }
                   }}
                 />
               }
               label={
-                <Typography sx={{ color: '#e8eaed', fontSize: '14px' }}>
+                <Typography sx={{ color: theme.palette.text.primary, fontSize: '14px' }}>
                   {airline}
                 </Typography>
               }

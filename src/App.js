@@ -7,6 +7,7 @@ import FlightSearch from './components/FlightSearch/FlightSearch';
 import FlightResults from './components/FlightSearch/FlightResults';
 import Footer from './components/Layout/Footer';
 import { FlightProvider } from './context/FlightContext';
+import { ThemeModeProvider } from './context/ThemeContext';
 
 function App() {
   const [searchTrigger, setSearchTrigger] = useState(0);
@@ -101,23 +102,25 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <FlightProvider>
-        <Box sx={{ 
-          minHeight: '100vh', 
-          display: 'flex', 
-          flexDirection: 'column',
-          backgroundColor: mode === 'dark' ? '#202124' : '#f5f5f5'
-        }}>
-          <Header mode={mode} setMode={setMode} />
-          <Container maxWidth="lg" sx={{ py: 3, flex: 1 }}>
-            <Box sx={{ mb: 3 }}>
-              <FlightSearch onSearch={handleSearch} />
-            </Box>
-            <FlightResults shouldSearch={searchTrigger} />
-          </Container>
-          <Footer />
-        </Box>
-      </FlightProvider>
+      <ThemeModeProvider mode={mode} setMode={setMode}>
+        <FlightProvider>
+          <Box sx={{ 
+            minHeight: '100vh', 
+            display: 'flex', 
+            flexDirection: 'column',
+            backgroundColor: mode === 'dark' ? '#202124' : '#f5f5f5'
+          }}>
+            <Header />
+            <Container maxWidth="lg" sx={{ py: 3, flex: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <FlightSearch onSearch={handleSearch} />
+              </Box>
+              <FlightResults shouldSearch={searchTrigger} />
+            </Container>
+            <Footer />
+          </Box>
+        </FlightProvider>
+      </ThemeModeProvider>
     </ThemeProvider>
   );
 }

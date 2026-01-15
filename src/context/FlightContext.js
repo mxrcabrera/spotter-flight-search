@@ -10,227 +10,289 @@ export const useFlightContext = () => {
   return context;
 };
 
+// Función auxiliar para convertir HH:MM a minutos desde medianoche
+const timeToMinutes = (timeStr) => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+// Función auxiliar para convertir minutos a ISO datetime string
+const minutesToISO = (minutes, dateString = '2024-01-15') => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return new Date(`${dateString}T${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`).toISOString();
+};
+
+// Función auxiliar para convertir duración "Xh Ym" a minutos
+const durationToMinutes = (durationStr) => {
+  const match = durationStr.match(/(\d+)h\s*(\d+)m/);
+  if (match) {
+    return parseInt(match[1]) * 60 + parseInt(match[2]);
+  }
+  return 0;
+};
+
 // Mock data con 20 vuelos variados
 const MOCK_FLIGHTS = [
   {
     id: 'flight-1',
-    airline: 'AA',
-    airlineName: 'American Airlines',
+    airlineCode: 'AA',
+    airline: 'American Airlines',
     price: 450,
     currency: 'USD',
     stops: 0,
-    duration: '5h 30m',
-    departure: { time: '08:00', airport: 'JFK' },
-    arrival: { time: '13:30', airport: 'LAX' }
+    duration: durationToMinutes('5h 30m'),
+    departureTime: minutesToISO(timeToMinutes('08:00')),
+    arrivalTime: minutesToISO(timeToMinutes('13:30')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-2',
-    airline: 'UA',
-    airlineName: 'United Airlines',
+    airlineCode: 'UA',
+    airline: 'United Airlines',
     price: 320,
     currency: 'USD',
     stops: 1,
-    duration: '7h 45m',
-    departure: { time: '10:30', airport: 'JFK' },
-    arrival: { time: '19:15', airport: 'LAX' }
+    duration: durationToMinutes('7h 45m'),
+    departureTime: minutesToISO(timeToMinutes('10:30')),
+    arrivalTime: minutesToISO(timeToMinutes('19:15')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-3',
-    airline: 'DL',
-    airlineName: 'Delta Airlines',
+    airlineCode: 'DL',
+    airline: 'Delta Airlines',
     price: 380,
     currency: 'USD',
     stops: 1,
-    duration: '8h 20m',
-    departure: { time: '06:15', airport: 'JFK' },
-    arrival: { time: '15:35', airport: 'LAX' }
+    duration: durationToMinutes('8h 20m'),
+    departureTime: minutesToISO(timeToMinutes('06:15')),
+    arrivalTime: minutesToISO(timeToMinutes('15:35')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-4',
-    airline: 'BA',
-    airlineName: 'British Airways',
+    airlineCode: 'BA',
+    airline: 'British Airways',
     price: 520,
     currency: 'USD',
     stops: 0,
-    duration: '5h 15m',
-    departure: { time: '14:00', airport: 'JFK' },
-    arrival: { time: '19:15', airport: 'LAX' }
+    duration: durationToMinutes('5h 15m'),
+    departureTime: minutesToISO(timeToMinutes('14:00')),
+    arrivalTime: minutesToISO(timeToMinutes('19:15')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-5',
-    airline: 'LH',
-    airlineName: 'Lufthansa',
+    airlineCode: 'LH',
+    airline: 'Lufthansa',
     price: 410,
     currency: 'USD',
     stops: 1,
-    duration: '8h 10m',
-    departure: { time: '11:45', airport: 'JFK' },
-    arrival: { time: '20:55', airport: 'LAX' }
+    duration: durationToMinutes('8h 10m'),
+    departureTime: minutesToISO(timeToMinutes('11:45')),
+    arrivalTime: minutesToISO(timeToMinutes('20:55')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-6',
-    airline: 'UA',
-    airlineName: 'United Airlines',
+    airlineCode: 'UA',
+    airline: 'United Airlines',
     price: 280,
     currency: 'USD',
     stops: 2,
-    duration: '10h 30m',
-    departure: { time: '07:00', airport: 'JFK' },
-    arrival: { time: '18:30', airport: 'LAX' }
+    duration: durationToMinutes('10h 30m'),
+    departureTime: minutesToISO(timeToMinutes('07:00')),
+    arrivalTime: minutesToISO(timeToMinutes('18:30')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-7',
-    airline: 'AA',
-    airlineName: 'American Airlines',
+    airlineCode: 'AA',
+    airline: 'American Airlines',
     price: 550,
     currency: 'USD',
     stops: 0,
-    duration: '5h 35m',
-    departure: { time: '16:30', airport: 'JFK' },
-    arrival: { time: '22:05', airport: 'LAX' }
+    duration: durationToMinutes('5h 35m'),
+    departureTime: minutesToISO(timeToMinutes('16:30')),
+    arrivalTime: minutesToISO(timeToMinutes('22:05')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-8',
-    airline: 'SW',
-    airlineName: 'Southwest Airlines',
+    airlineCode: 'SW',
+    airline: 'Southwest Airlines',
     price: 340,
     currency: 'USD',
     stops: 1,
-    duration: '7h 55m',
-    departure: { time: '09:15', airport: 'JFK' },
-    arrival: { time: '18:10', airport: 'LAX' }
+    duration: durationToMinutes('7h 55m'),
+    departureTime: minutesToISO(timeToMinutes('09:15')),
+    arrivalTime: minutesToISO(timeToMinutes('18:10')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-9',
-    airline: 'DL',
-    airlineName: 'Delta Airlines',
+    airlineCode: 'DL',
+    airline: 'Delta Airlines',
     price: 2100,
     currency: 'USD',
     stops: 0,
-    duration: '5h 20m',
-    departure: { time: '12:00', airport: 'JFK' },
-    arrival: { time: '17:20', airport: 'LAX' }
+    duration: durationToMinutes('5h 20m'),
+    departureTime: minutesToISO(timeToMinutes('12:00')),
+    arrivalTime: minutesToISO(timeToMinutes('17:20')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-10',
-    airline: 'BA',
-    airlineName: 'British Airways',
+    airlineCode: 'BA',
+    airline: 'British Airways',
     price: 390,
     currency: 'USD',
     stops: 2,
-    duration: '9h 45m',
-    departure: { time: '05:30', airport: 'JFK' },
-    arrival: { time: '16:15', airport: 'LAX' }
+    duration: durationToMinutes('9h 45m'),
+    departureTime: minutesToISO(timeToMinutes('05:30')),
+    arrivalTime: minutesToISO(timeToMinutes('16:15')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-11',
-    airline: 'LH',
-    airlineName: 'Lufthansa',
+    airlineCode: 'LH',
+    airline: 'Lufthansa',
     price: 360,
     currency: 'USD',
     stops: 1,
-    duration: '8h 00m',
-    departure: { time: '13:20', airport: 'JFK' },
-    arrival: { time: '22:20', airport: 'LAX' }
+    duration: durationToMinutes('8h 00m'),
+    departureTime: minutesToISO(timeToMinutes('13:20')),
+    arrivalTime: minutesToISO(timeToMinutes('22:20')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-12',
-    airline: 'UA',
-    airlineName: 'United Airlines',
+    airlineCode: 'UA',
+    airline: 'United Airlines',
     price: 1890,
     currency: 'USD',
     stops: 0,
-    duration: '5h 25m',
-    departure: { time: '18:45', airport: 'JFK' },
-    arrival: { time: '23:10', airport: 'LAX' }
+    duration: durationToMinutes('5h 25m'),
+    departureTime: minutesToISO(timeToMinutes('18:45')),
+    arrivalTime: minutesToISO(timeToMinutes('23:10')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-13',
-    airline: 'AA',
-    airlineName: 'American Airlines',
+    airlineCode: 'AA',
+    airline: 'American Airlines',
     price: 420,
     currency: 'USD',
     stops: 1,
-    duration: '7h 40m',
-    departure: { time: '10:00', airport: 'JFK' },
-    arrival: { time: '18:40', airport: 'LAX' }
+    duration: durationToMinutes('7h 40m'),
+    departureTime: minutesToISO(timeToMinutes('10:00')),
+    arrivalTime: minutesToISO(timeToMinutes('18:40')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-14',
-    airline: 'SW',
-    airlineName: 'Southwest Airlines',
+    airlineCode: 'SW',
+    airline: 'Southwest Airlines',
     price: 300,
     currency: 'USD',
     stops: 2,
-    duration: '10h 15m',
-    departure: { time: '06:45', airport: 'JFK' },
-    arrival: { time: '17:00', airport: 'LAX' }
+    duration: durationToMinutes('10h 15m'),
+    departureTime: minutesToISO(timeToMinutes('06:45')),
+    arrivalTime: minutesToISO(timeToMinutes('17:00')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-15',
-    airline: 'DL',
-    airlineName: 'Delta Airlines',
+    airlineCode: 'DL',
+    airline: 'Delta Airlines',
     price: 475,
     currency: 'USD',
     stops: 1,
-    duration: '8h 05m',
-    departure: { time: '15:15', airport: 'JFK' },
-    arrival: { time: '23:20', airport: 'LAX' }
+    duration: durationToMinutes('8h 05m'),
+    departureTime: minutesToISO(timeToMinutes('15:15')),
+    arrivalTime: minutesToISO(timeToMinutes('23:20')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-16',
-    airline: 'BA',
-    airlineName: 'British Airways',
+    airlineCode: 'BA',
+    airline: 'British Airways',
     price: 510,
     currency: 'USD',
     stops: 1,
-    duration: '8h 30m',
-    departure: { time: '11:00', airport: 'JFK' },
-    arrival: { time: '20:30', airport: 'LAX' }
+    duration: durationToMinutes('8h 30m'),
+    departureTime: minutesToISO(timeToMinutes('11:00')),
+    arrivalTime: minutesToISO(timeToMinutes('20:30')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-17',
-    airline: 'LH',
-    airlineName: 'Lufthansa',
+    airlineCode: 'LH',
+    airline: 'Lufthansa',
     price: 2500,
     currency: 'USD',
     stops: 0,
-    duration: '5h 15m',
-    departure: { time: '19:30', airport: 'JFK' },
-    arrival: { time: '23:45', airport: 'LAX' }
+    duration: durationToMinutes('5h 15m'),
+    departureTime: minutesToISO(timeToMinutes('19:30')),
+    arrivalTime: minutesToISO(timeToMinutes('23:45')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-18',
-    airline: 'UA',
-    airlineName: 'United Airlines',
+    airlineCode: 'UA',
+    airline: 'United Airlines',
     price: 350,
     currency: 'USD',
     stops: 1,
-    duration: '7h 50m',
-    departure: { time: '08:45', airport: 'JFK' },
-    arrival: { time: '17:35', airport: 'LAX' }
+    duration: durationToMinutes('7h 50m'),
+    departureTime: minutesToISO(timeToMinutes('08:45')),
+    arrivalTime: minutesToISO(timeToMinutes('17:35')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-19',
-    airline: 'AA',
-    airlineName: 'American Airlines',
+    airlineCode: 'AA',
+    airline: 'American Airlines',
     price: 390,
     currency: 'USD',
     stops: 2,
-    duration: '9h 20m',
-    departure: { time: '04:30', airport: 'JFK' },
-    arrival: { time: '14:50', airport: 'LAX' }
+    duration: durationToMinutes('9h 20m'),
+    departureTime: minutesToISO(timeToMinutes('04:30')),
+    arrivalTime: minutesToISO(timeToMinutes('14:50')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   },
   {
     id: 'flight-20',
-    airline: 'SW',
-    airlineName: 'Southwest Airlines',
+    airlineCode: 'SW',
+    airline: 'Southwest Airlines',
     price: 320,
     currency: 'USD',
     stops: 1,
-    duration: '7h 35m',
-    departure: { time: '12:30', airport: 'JFK' },
-    arrival: { time: '21:05', airport: 'LAX' }
+    duration: durationToMinutes('7h 35m'),
+    departureTime: minutesToISO(timeToMinutes('12:30')),
+    arrivalTime: minutesToISO(timeToMinutes('21:05')),
+    originCode: 'JFK',
+    destinationCode: 'LAX'
   }
 ];
 

@@ -7,11 +7,11 @@ import FlightSearch from './components/FlightSearch/FlightSearch';
 import FlightResults from './components/FlightSearch/FlightResults';
 import Footer from './components/Layout/Footer';
 import { FlightProvider } from './context/FlightContext';
-import { ThemeModeProvider } from './context/ThemeContext';
+import { ThemeModeProvider, useThemeMode } from './context/ThemeContext';
 
-function App() {
+function AppContent() {
+  const { mode } = useThemeMode();
   const [searchTrigger, setSearchTrigger] = useState(0);
-  const [mode, setMode] = useState('dark');
 
   const theme = useMemo(() => createTheme({
     palette: {
@@ -102,26 +102,32 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ThemeModeProvider mode={mode} setMode={setMode}>
-        <FlightProvider>
-          <Box sx={{ 
-            minHeight: '100vh', 
-            display: 'flex', 
-            flexDirection: 'column',
-            backgroundColor: mode === 'dark' ? '#202124' : '#f5f5f5'
-          }}>
-            <Header />
-            <Container maxWidth="lg" sx={{ py: 3, flex: 1 }}>
-              <Box sx={{ mb: 3 }}>
-                <FlightSearch onSearch={handleSearch} />
-              </Box>
-              <FlightResults shouldSearch={searchTrigger} />
-            </Container>
-            <Footer />
-          </Box>
-        </FlightProvider>
-      </ThemeModeProvider>
+      <FlightProvider>
+        <Box sx={{ 
+          minHeight: '100vh', 
+          display: 'flex', 
+          flexDirection: 'column',
+          backgroundColor: mode === 'dark' ? '#202124' : '#f5f5f5'
+        }}>
+          <Header />
+          <Container maxWidth="lg" sx={{ py: 3, flex: 1 }}>
+            <Box sx={{ mb: 3 }}>
+              <FlightSearch onSearch={handleSearch} />
+            </Box>
+            <FlightResults shouldSearch={searchTrigger} />
+          </Container>
+          <Footer />
+        </Box>
+      </FlightProvider>
     </ThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <ThemeModeProvider>
+      <AppContent />
+    </ThemeModeProvider>
   );
 }
 

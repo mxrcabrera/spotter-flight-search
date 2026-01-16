@@ -60,18 +60,26 @@ src/
 │   │   ├── FlightCard.jsx       # Individual flight display
 │   │   ├── FlightResults.jsx    # Results grid with sorting
 │   │   ├── FlightSearch.jsx     # Search form
+│   │   ├── PriceCalendar.jsx    # 30-day price calendar
 │   │   └── PriceGraph.jsx       # Recharts price visualization
-│   └── Layout/
-│       ├── Header.jsx           # Navigation bar with theme toggle
-│       └── Footer.jsx           # Footer with links
+│   ├── Layout/
+│   │   ├── Header.jsx           # Navigation bar with theme toggle
+│   │   └── Footer.jsx           # Footer with links
+│   └── Onboarding/
+│       └── OnboardingTour.jsx   # Interactive guided tour
 ├── context/
 │   ├── FlightContext.js         # Global flight state and filters
-│   └── ThemeContext.js          # Dark/light mode state
+│   └── OnboardingContext.js     # Tour state management
 ├── services/
 │   └── amadeus.js               # Amadeus API integration
+├── utils/
+│   ├── constants.js             # App constants and config
+│   └── formatters.js            # Date/time/price formatters
 ├── App.js                       # Root component with theme provider
 ├── index.js                     # Entry point
 └── setupTests.js                # Jest configuration
+e2e/
+└── flight-search.spec.js        # Playwright E2E tests
 ```
 
 ---
@@ -136,6 +144,34 @@ Recharts LineChart visualization:
 - Updates in real-time when filters change
 - Responsive container that adapts to screen width
 
+### PriceCalendar.jsx
+
+30-day price calendar with color-coded pricing:
+- **Green:** Low prices (bottom 33%)
+- **Yellow:** Average prices (middle 33%)
+- **Red:** High prices (top 33%)
+
+**Features:**
+- Click any date to search flights for that day
+- Week/month navigation arrows
+- Responsive: horizontal scroll on mobile, full grid on desktop
+- Displays lowest price per day
+
+### OnboardingTour.jsx
+
+Interactive 4-step guided tour for new users:
+1. Search form introduction
+2. Price calendar explanation
+3. Filter panel walkthrough
+4. Flight cards overview
+
+**Features:**
+- Highlights target elements with spotlight effect
+- Persists completion state in localStorage
+- Can be relaunched via "?" button in header
+- Fully accessible with keyboard navigation
+- Responsive positioning (adapts to mobile/desktop)
+
 ---
 
 ## State Management
@@ -186,6 +222,22 @@ Simple context for dark/light mode:
   setMode: function
 }
 ```
+
+### OnboardingContext
+
+Manages the interactive tour state:
+```javascript
+{
+  isActive: boolean,      // Tour is currently running
+  currentStep: number,    // Current step (0-3)
+  startTour: function,    // Begin the tour
+  endTour: function,      // End and mark complete
+  nextStep: function,     // Go to next step
+  prevStep: function      // Go to previous step
+}
+```
+
+Tour completion is persisted in localStorage under `onboardingCompleted`.
 
 ---
 
@@ -294,9 +346,9 @@ The development server runs at `http://localhost:3000`.
 
 ## Testing
 
-### Test Setup
+### Unit Tests (Jest + React Testing Library)
 
-Tests use Jest and React Testing Library. Configuration in `package.json`:
+Configuration in `package.json`:
 ```json
 {
   "jest": {
@@ -311,10 +363,8 @@ The `setupTests.js` file includes:
 - Jest DOM matchers
 - ResizeObserver mock for Recharts compatibility
 
-### Running Tests
-
 ```bash
-# Run all tests
+# Run unit tests
 npm test
 
 # Run tests once (CI mode)
@@ -324,24 +374,66 @@ npm test -- --watchAll=false
 npm test -- --coverage
 ```
 
-### Current Test Coverage
-
+**Current unit tests (3 total):**
 - App renders correctly
 - Search button is present
 - Trip type toggle buttons are present
+
+### E2E Tests (Playwright)
+
+End-to-end tests using Playwright for cross-browser testing.
+
+```bash
+# Run E2E tests
+npm run test:e2e
+
+# Run with UI
+npx playwright test --ui
+
+# Run specific test file
+npx playwright test e2e/flight-search.spec.js
+```
+
+**E2E test coverage (15 tests):**
+- Flight search flow
+- Filter functionality (price, stops, airlines)
+- Price calendar interaction
+- Dark/light mode toggle
+- Responsive design (desktop and mobile viewports)
+- Keyboard navigation
+- Accessibility (axe-core integration)
 
 ---
 
 ## Deployment
 
-### Vercel (Recommended)
+### Netlify (Production)
 
+**Live URL:** https://spotter-flight-search.netlify.app
+
+The project includes a `netlify.toml` configuration:
+```toml
+[build]
+  publish = "build"
+  command = "npm run build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+**Deploy manually:**
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Install Netlify CLI
+npm install -g netlify-cli
 
-# Deploy
-vercel
+# Login
+netlify login
+
+# Build and deploy
+npm run build
+netlify deploy --prod --dir=build
 ```
 
 ### Environment Variables
@@ -353,8 +445,9 @@ Set the following in your deployment platform:
 ### Build Output
 
 Production build generates optimized static files in the `build/` directory:
-- `static/js/main.[hash].js` - Application bundle (~274 KB gzipped)
-- `static/css/main.[hash].css` - Styles (~263 B gzipped)
+- `static/js/main.[hash].js` - Application bundle (~179 KB gzipped)
+- `static/js/*.chunk.js` - Lazy-loaded chunks (~127 KB total)
+- `static/css/main.[hash].css` - Styles (~336 B gzipped)
 
 ---
 

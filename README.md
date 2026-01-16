@@ -10,6 +10,7 @@ A responsive flight search application with real-time filtering and price visual
 - Material-UI 7.3.7
 - Recharts 2.15.0
 - Axios 1.13.2
+- Playwright (E2E Testing)
 - Amadeus Flight API
 
 ## Quick Start
@@ -32,6 +33,10 @@ REACT_APP_AMADEUS_API_SECRET=your_secret
 - **Search Form:** Origin, destination, dates, passengers, cabin class
 - **Live Price Graph:** Real-time visualization that updates with filters
 - **Advanced Filtering:** Price range slider, stops, airlines (AND logic)
+- **Price Calendar:** 30-day price overview with color-coded pricing
+- **Dark/Light Mode:** Theme toggle with system preference detection
+- **Interactive Onboarding:** Guided tour for new users
+- **Result Sorting:** By price, duration, or departure time
 - **Responsive Design:** Optimized for desktop and mobile
 
 ## Documentation
@@ -48,7 +53,8 @@ See [DOCUMENTATION.md](DOCUMENTATION.md) for technical details including:
 | Command | Description |
 |---------|-------------|
 | `npm start` | Development server |
-| `npm test` | Run tests |
+| `npm test` | Run unit tests |
+| `npm run test:e2e` | Run E2E tests (Playwright) |
 | `npm run build` | Production build |
 
 ## License

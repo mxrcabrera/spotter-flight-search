@@ -2,7 +2,7 @@
 
 A responsive flight search application with real-time filtering and price visualization. Search flights, filter by price/stops/airlines, and view price trends on an interactive graph.
 
-**Live Demo:** [LIVE_DEMO_URL]
+**Live Demo:** [https://spotter-flight-search.netlify.app](https://spotter-flight-search.netlify.app)
 
 ## Tech Stack
 

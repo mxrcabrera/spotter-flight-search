@@ -1,289 +1,287 @@
-import { useState } from 'react';
-import { Box, Typography, Chip, Collapse } from '@mui/material';
+import { useState, useMemo, memo } from 'react';
+import PropTypes from 'prop-types';
+import { Box, Typography, Chip, Collapse, useTheme, useMediaQuery } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { formatTime, formatDuration, formatStops } from '../../utils/formatters';
+import { CO2_PER_MINUTE, CO2_BASE_EMISSIONS } from '../../utils/constants';
 
-const FlightCard = ({ flight, priceColor = "#4caf50" }) => {
+const LAYOVER_DURATION_RATIO = 0.15;
+
+const FlightCard = memo(function FlightCard({ flight, priceColor }) {
   const [expanded, setExpanded] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const period = hours >= 12 ? 'p.m.' : 'a.m.';
-    const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
-    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
-  };
-  
-  const formatDuration = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}min`;
+  const co2Emissions = useMemo(() => {
+    return Math.round(CO2_BASE_EMISSIONS + (flight.duration * CO2_PER_MINUTE));
+  }, [flight.duration]);
+
+  const layoverDuration = useMemo(() => {
+    if (flight.stops === 0) return null;
+    return formatDuration(Math.round(flight.duration * LAYOVER_DURATION_RATIO));
+  }, [flight.stops, flight.duration]);
+
+  const displayPriceColor = priceColor || theme.palette.text.primary;
+  const stopsText = formatStops(flight.stops);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setExpanded(!expanded);
+    }
   };
 
-  const getAirlineColor = (code) => {
-    return '#1a73e8';
-  };
-  
+  const flightDescription = `${flight.airlineCode}, ${formatTime(flight.departureTime)} - ${formatTime(flight.arrivalTime)}, ${formatDuration(flight.duration)} · ${stopsText}, $${flight.price}`;
+
+  if (isMobile) {
+    return (
+      <Box
+        onClick={() => setExpanded(!expanded)}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-expanded={expanded}
+        aria-label={flightDescription}
+        sx={{
+          py: 1.5,
+          px: 0.5,
+          borderBottom: 1,
+          borderColor: 'divider',
+          cursor: 'pointer',
+          '&:active': { bgcolor: 'action.hover' },
+          '&:focus-visible': {
+            outline: '2px solid',
+            outlineColor: 'primary.main',
+            outlineOffset: -2
+          }
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{
+            width: 32,
+            height: 32,
+            borderRadius: 1,
+            bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <Typography sx={{ fontSize: 10, fontWeight: 700, color: 'text.secondary' }}>
+              {flight.airlineCode}
+            </Typography>
+          </Box>
+
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                {formatTime(flight.departureTime)}
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>-</Typography>
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                {formatTime(flight.arrivalTime)}
+              </Typography>
+            </Box>
+            <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 0.25 }}>
+              {formatDuration(flight.duration)} · {stopsText}
+            </Typography>
+          </Box>
+
+          <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
+            <Typography sx={{ fontSize: 15, fontWeight: 700, color: displayPriceColor }}>
+              ${flight.price}
+            </Typography>
+          </Box>
+
+          {expanded ? (
+            <KeyboardArrowUp sx={{ fontSize: 20, color: 'text.secondary', flexShrink: 0 }} />
+          ) : (
+            <KeyboardArrowDown sx={{ fontSize: 20, color: 'text.secondary', flexShrink: 0 }} />
+          )}
+        </Box>
+
+        <Collapse in={expanded}>
+          <Box sx={{ mt: 1.5, pl: 5.5, pr: 1 }}>
+            <Box sx={{ display: 'flex', gap: 3, mb: 1 }}>
+              <Box>
+                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>Airline</Typography>
+                <Typography sx={{ fontSize: 12 }}>{flight.airline}</Typography>
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>Route</Typography>
+                <Typography sx={{ fontSize: 12 }}>{flight.originCode} - {flight.destinationCode}</Typography>
+              </Box>
+              {flight.stops > 0 && (
+                <Box>
+                  <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>Layover</Typography>
+                  <Typography sx={{ fontSize: 12 }}>{layoverDuration}</Typography>
+                </Box>
+              )}
+              <Box>
+                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>CO2</Typography>
+                <Typography sx={{ fontSize: 12 }}>{co2Emissions} kg</Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Collapse>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ 
-      borderBottom: '1px solid #444746',
-      '&:last-child': { borderBottom: 'none' }
-    }}>
-      {/* Main Card */}
-      <Box sx={{ 
-        py: 2,
-        px: 3,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+    <Box
+      data-tour="flight-card"
+      onClick={() => setExpanded(!expanded)}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-expanded={expanded}
+      aria-label={flightDescription}
+      sx={{
+        bgcolor: 'background.paper',
+        borderRadius: 2,
+        overflow: 'hidden',
+        border: 1,
+        borderColor: expanded ? 'primary.main' : 'divider',
         cursor: 'pointer',
-        backgroundColor: '#202124',
-        '&:hover': {
-          backgroundColor: 'rgba(255,255,255,0.04)'
+        transition: 'all 0.2s ease',
+        '&:hover': { borderColor: 'primary.light', boxShadow: 1 },
+        '&:focus-visible': {
+          outline: '2px solid',
+          outlineColor: 'primary.main',
+          outlineOffset: 2
         }
       }}
-      onClick={() => setExpanded(!expanded)}
-      >
-        {/* Airline Logo */}
-        <Box sx={{ 
-          width: 40, 
-          height: 40, 
-          borderRadius: '50%',
-          backgroundColor: getAirlineColor(flight.airlineCode),
-          display: 'flex', 
-          alignItems: 'center', 
+    >
+      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 3 }}>
+        <Box sx={{
+          width: 48,
+          height: 48,
+          borderRadius: 2,
+          bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'center',
-          flexShrink: 0,
-          mr: 3
+          border: 1,
+          borderColor: 'divider',
+          flexShrink: 0
         }}>
-          <Typography sx={{ 
-            color: 'white', 
-            fontSize: '14px',
-            fontWeight: 'bold'
-          }}>
+          <Typography sx={{ color: 'text.primary', fontSize: 14, fontWeight: 700 }}>
             {flight.airlineCode}
           </Typography>
         </Box>
 
-        {/* Flight Times & Info */}
-        <Box sx={{ flex: 1, mr: 3 }}>
-          <Typography sx={{ 
-            color: '#e8eaed',
-            fontSize: '16px',
-            fontWeight: 400,
-            mb: 0.5,
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            {formatTime(flight.departureTime)} – {formatTime(flight.arrivalTime)}
-            <Typography component="span" sx={{ fontSize: '12px', color: '#9aa0a6', ml: 0.5 }}>
-              +1
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 0.5 }}>
+            <Typography sx={{ color: 'text.primary', fontSize: 18, fontWeight: 600 }}>
+              {formatTime(flight.departureTime)}
             </Typography>
-          </Typography>
-          <Typography sx={{ 
-            color: '#9aa0a6',
-            fontSize: '14px'
-          }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: 14 }}>-</Typography>
+            <Typography sx={{ color: 'text.primary', fontSize: 18, fontWeight: 600 }}>
+              {formatTime(flight.arrivalTime)}
+            </Typography>
+          </Box>
+          <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
             {flight.airline}
-            {flight.operatedBy && ` • ${flight.operatedBy}`}
           </Typography>
         </Box>
 
-        {/* Duration */}
-        <Box sx={{ minWidth: '90px', mr: 3, textAlign: 'center' }}>
-          <Typography sx={{ 
-            color: '#e8eaed',
-            fontSize: '14px',
-            mb: 0.5
-          }}>
+        <Box sx={{ textAlign: 'center', minWidth: 90 }}>
+          <Typography sx={{ color: 'text.primary', fontSize: 14, fontWeight: 500 }}>
             {formatDuration(flight.duration)}
           </Typography>
-          <Typography sx={{ 
-            color: '#9aa0a6',
-            fontSize: '12px'
-          }}>
-            {flight.originCode} – {flight.destinationCode}
+          <Typography sx={{ color: 'text.secondary', fontSize: 12 }}>
+            {flight.originCode}-{flight.destinationCode}
           </Typography>
         </Box>
 
-        {/* Stops */}
-        <Box sx={{ minWidth: '90px', mr: 3, textAlign: 'center' }}>
-          <Typography sx={{ 
-            color: '#e8eaed',
-            fontSize: '14px',
-            mb: 0.5
-          }}>
-            {flight.stops === 0 ? 'Nonstop' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}
-          </Typography>
-          {flight.stops > 0 && (
-            <Typography sx={{ 
-              color: '#9aa0a6',
-              fontSize: '12px'
-            }}>
-              2h 30min GRU
-            </Typography>
-          )}
-        </Box>
-
-        {/* CO2 */}
-        <Box sx={{ minWidth: '120px', mr: 3, textAlign: 'center' }}>
-          <Typography sx={{ 
-            color: '#e8eaed',
-            fontSize: '14px',
-            mb: 0.5
-          }}>
-            {Math.floor(Math.random() * 300) + 600}kg de CO2e
-          </Typography>
-          <Chip 
-            label="Avg emissions"
+        <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+          <Chip
+            label={flight.stops === 0 ? 'Direct' : stopsText}
             size="small"
-            sx={{ 
-              fontSize: '11px', 
-              height: '20px',
-              backgroundColor: '#5f6368',
-              color: '#e8eaed'
+            sx={{
+              fontSize: 12,
+              fontWeight: 600,
+              bgcolor: flight.stops === 0 ? 'success.dark' : 'warning.dark',
+              color: 'white'
             }}
           />
         </Box>
 
-        {/* Price */}
-        <Box sx={{ 
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5
-        }}>
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography sx={{ 
-              color: priceColor,
-              fontSize: '16px',
-              fontWeight: 500
-            }}>
-              USD {flight.price.toLocaleString()}
-            </Typography>
-            <Typography sx={{ 
-              color: '#9aa0a6',
-              fontSize: '12px'
-            }}>
-              round trip
-            </Typography>
-          </Box>
-          
-          {/* Expand Arrow */}
-          {expanded ? (
-            <KeyboardArrowUp sx={{ color: '#9aa0a6' }} />
-          ) : (
-            <KeyboardArrowDown sx={{ color: '#9aa0a6' }} />
-          )}
+        <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: 13 }}>
+            {co2Emissions} kg
+          </Typography>
         </Box>
+
+        <Box sx={{ textAlign: 'right', minWidth: 100 }}>
+          <Typography sx={{ color: displayPriceColor, fontSize: 20, fontWeight: 700 }}>
+            ${flight.price}
+          </Typography>
+          <Typography sx={{ color: 'text.secondary', fontSize: 12 }}>
+            round trip
+          </Typography>
+        </Box>
+
+        {expanded ? (
+          <KeyboardArrowUp sx={{ color: 'text.secondary' }} />
+        ) : (
+          <KeyboardArrowDown sx={{ color: 'text.secondary' }} />
+        )}
       </Box>
 
-      {/* Expanded Details */}
       <Collapse in={expanded}>
-        <Box sx={{ backgroundColor: '#202124', borderTop: '1px solid #444746' }}>
-          {/* Departure Header */}
-          <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-            <Typography sx={{ color: '#e8eaed', fontSize: '14px', fontWeight: 500, mr: 0.5 }}>
-              Departure
-            </Typography>
-            <Typography sx={{ color: '#9aa0a6', fontSize: '14px' }}>
-              • Wed, Aug 13
-            </Typography>
-          </Box>
-          
-          {/* First flight segment */}
-          <Box sx={{ px: 2, pt: 1, pb: 2 }}>
-            <Box sx={{ display: 'flex', mb: 1 }}>
-              <Box sx={{ 
-                minWidth: '40px',
-                display: 'flex',
-                justifyContent: 'center'
-              }}>
-                <Box sx={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  backgroundColor: getAirlineColor(flight.airlineCode),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Typography sx={{ color: 'white', fontSize: '12px', fontWeight: 'bold' }}>
-                    {flight.airlineCode}
-                  </Typography>
-                </Box>
+        <Box sx={{ px: 2.5, pb: 2.5, borderTop: 1, borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', gap: 4, pt: 2 }}>
+            <Box>
+              <Typography sx={{ color: 'text.secondary', fontSize: 11, fontWeight: 600, mb: 0.5 }}>
+                DEPARTURE
+              </Typography>
+              <Typography sx={{ color: 'text.primary', fontSize: 14 }}>
+                {new Date(flight.departureTime).toLocaleDateString('en-US', {
+                  weekday: 'long', month: 'long', day: 'numeric'
+                })}
+              </Typography>
+            </Box>
+            {flight.stops > 0 && (
+              <Box>
+                <Typography sx={{ color: 'text.secondary', fontSize: 11, fontWeight: 600, mb: 0.5 }}>
+                  LAYOVER
+                </Typography>
+                <Typography sx={{ color: 'text.primary', fontSize: 14 }}>
+                  {layoverDuration}
+                </Typography>
               </Box>
-              <Typography sx={{ color: '#9aa0a6', fontSize: '14px', ml: 1 }}>
-                Travel time: 2h 20min
+            )}
+            <Box>
+              <Typography sx={{ color: 'text.secondary', fontSize: 11, fontWeight: 600, mb: 0.5 }}>
+                CO2 EMISSIONS
+              </Typography>
+              <Typography sx={{ color: 'text.primary', fontSize: 14 }}>
+                {co2Emissions} kg
               </Typography>
             </Box>
-            
-            {/* Origin Airport */}
-            <Box sx={{ display: 'flex', mb: 1, ml: 6 }}>
-              <Typography sx={{ color: '#e8eaed', fontSize: '14px', minWidth: '80px' }}>
-                3:40 p.m.
-              </Typography>
-              <Typography sx={{ color: '#9aa0a6', fontSize: '14px' }}>
-                Aeropuerto Internacional Jorge Newbery (AEP)
-              </Typography>
-            </Box>
-            
-            {/* Destination Airport */}
-            <Box sx={{ display: 'flex', mb: 1, ml: 6 }}>
-              <Typography sx={{ color: '#e8eaed', fontSize: '14px', minWidth: '80px' }}>
-                5:00 p.m.
-              </Typography>
-              <Typography sx={{ color: '#9aa0a6', fontSize: '14px' }}>
-                Aeropuerto Internacional Arturo Merino Benítez (SCL)
-              </Typography>
-            </Box>
-            
-            {/* Airline details */}
-            <Box sx={{ ml: 12, mb: 1 }}>
-              <Typography sx={{ color: '#9aa0a6', fontSize: '12px' }}>
-                LATAM • Tourist class • Airbus A320 • LA 454
-              </Typography>
-              <Typography sx={{ color: '#9aa0a6', fontSize: '12px' }}>
-                Aircraft and crew by Latam Airlines Group
-              </Typography>
-            </Box>
-          </Box>
-          
-          {/* Scale */}
-          <Box sx={{ 
-            py: 1.5,
-            px: 2,
-            backgroundColor: '#333',
-            borderTop: '1px solid #444746',
-            borderBottom: '1px solid #444746'
-          }}>
-            <Typography sx={{ color: '#e8eaed', fontSize: '14px' }}>
-              2h stop • Santiago de Chile (SCL)
-            </Typography>
-          </Box>
-          
-          {/* Footer Details - Amenities */}
-          <Box sx={{ 
-            p: 2,
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 2,
-            borderTop: '1px solid #444746',
-            mt: 1
-          }}>
-            <Typography sx={{ color: '#9aa0a6', fontSize: '12px', display: 'flex', alignItems: 'center' }}>
-              🛋️ Little legroom (71 cm)
-            </Typography>
-            <Typography sx={{ color: '#9aa0a6', fontSize: '12px', display: 'flex', alignItems: 'center' }}>
-              🔌 Seats with USB ports
-            </Typography>
-            <Typography sx={{ color: '#9aa0a6', fontSize: '12px', display: 'flex', alignItems: 'center' }}>
-              📱 On-device entertainment
-            </Typography>
           </Box>
         </Box>
       </Collapse>
     </Box>
   );
+});
+
+FlightCard.propTypes = {
+  flight: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    airlineCode: PropTypes.string.isRequired,
+    airline: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    stops: PropTypes.number.isRequired,
+    duration: PropTypes.number.isRequired,
+    departureTime: PropTypes.string.isRequired,
+    arrivalTime: PropTypes.string.isRequired,
+    originCode: PropTypes.string.isRequired,
+    destinationCode: PropTypes.string.isRequired
+  }).isRequired,
+  priceColor: PropTypes.string
 };
 
 export default FlightCard;

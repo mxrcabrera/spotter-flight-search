@@ -1,168 +1,93 @@
-import { Box, Typography, Link, Container } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 
 const Footer = () => {
-  return (
-    <Box component="footer" sx={{ 
-      py: 3, 
-      backgroundColor: '#202124', 
-      borderTop: '1px solid #3c4043',
-      mt: 'auto' 
-    }}>
-      <Container maxWidth="lg">
-        {/* Main Footer Links */}
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: 0, 
-          mb: 3 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  if (isMobile) {
+    return (
+      <Box component="footer" sx={{
+        py: 2,
+        px: 2,
+        bgcolor: 'background.default',
+        borderTop: 1,
+        borderColor: 'divider',
+        mt: 'auto'
+      }}>
+        <Typography sx={{
+          color: 'text.secondary',
+          fontSize: 11,
+          textAlign: 'center',
+          mb: 1
         }}>
-          <Box sx={{
-            px: 3,
-            py: 1.5,
-            border: '1px solid #3c4043',
-            borderRadius: '20px 0 0 20px',
-            borderRight: 'none',
-            backgroundColor: '#303134'
-          }}>
-            <Link href="#" sx={{ 
-              color: '#8ab4f8',
-              fontSize: '14px',
-              textDecoration: 'none',
-              '&:hover': {
-                textDecoration: 'underline'
-              }
+          Built for Spotter technical challenge
+        </Typography>
+        <Typography sx={{
+          color: 'text.secondary',
+          fontSize: 10,
+          textAlign: 'center'
+        }}>
+          USD - English (US)
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box component="footer" sx={{
+      py: 3,
+      bgcolor: 'background.default',
+      borderTop: 1,
+      borderColor: 'divider',
+      mt: 'auto'
+    }}>
+      <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 0,
+            mb: 3
+          }}
+        >
+          {[
+            { label: 'Language: English (US)', radius: '20px 0 0 20px', borderRight: 'none' },
+            { label: 'Location: United States', radius: 0, borderRight: 'none' },
+            { label: 'Currency: USD', radius: '0 20px 20px 0', borderRight: undefined }
+          ].map(({ label, radius, borderRight }) => (
+            <Box key={label} sx={{
+              px: 3,
+              py: 1.5,
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: radius,
+              borderRight,
+              bgcolor: 'background.paper'
             }}>
-              Language: English (United States)
-            </Link>
-          </Box>
-          <Box sx={{
-            px: 3,
-            py: 1.5,
-            border: '1px solid #3c4043',
-            borderRadius: 0,
-            borderRight: 'none',
-            backgroundColor: '#303134'
-          }}>
-            <Link href="#" sx={{ 
-              color: '#8ab4f8',
-              fontSize: '14px',
-              textDecoration: 'none',
-              '&:hover': {
-                textDecoration: 'underline'
-              }
-            }}>
-              Location: United States
-            </Link>
-          </Box>
-          <Box sx={{
-            px: 3,
-            py: 1.5,
-            border: '1px solid #3c4043',
-            borderRadius: '0 20px 20px 0',
-            backgroundColor: '#303134'
-          }}>
-            <Link href="#" sx={{ 
-              color: '#8ab4f8',
-              fontSize: '14px',
-              textDecoration: 'none',
-              '&:hover': {
-                textDecoration: 'underline'
-              }
-            }}>
-              Currency: USD
-            </Link>
-          </Box>
+              <Typography sx={{ color: 'text.primary', fontSize: 14 }}>
+                {label}
+              </Typography>
+            </Box>
+          ))}
         </Box>
 
-        {/* Secondary Links */}
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: 3, 
-          mb: 2,
-          flexWrap: 'wrap'
-        }}>
-          <Link href="#" sx={{ 
-            color: '#8ab4f8',
-            fontSize: '12px',
-            textDecoration: 'none',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}>
-            About
-          </Link>
-          <Link href="#" sx={{ 
-            color: '#8ab4f8',
-            fontSize: '12px',
-            textDecoration: 'none',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}>
-            Privacy
-          </Link>
-          <Link href="#" sx={{ 
-            color: '#8ab4f8',
-            fontSize: '12px',
-            textDecoration: 'none',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}>
-            Terms
-          </Link>
-          <Link href="#" sx={{ 
-            color: '#8ab4f8',
-            fontSize: '12px',
-            textDecoration: 'none',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}>
-            Participate in user studies
-          </Link>
-          <Link href="#" sx={{ 
-            color: '#8ab4f8',
-            fontSize: '12px',
-            textDecoration: 'none',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}>
-            Feedback
-          </Link>
-          <Link href="#" sx={{ 
-            color: '#8ab4f8',
-            fontSize: '12px',
-            textDecoration: 'none',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}>
-            Help Center
-          </Link>
-        </Box>
-        
-        {/* Bottom Text */}
-        <Typography sx={{ 
-          color: '#9aa0a6',
-          fontSize: '11px',
+        <Typography sx={{
+          color: 'text.secondary',
+          fontSize: 12,
           textAlign: 'center',
-          lineHeight: 1.4
+          mb: 1
         }}>
-          Displayed currencies may differ from the currencies used to purchase flights. 
-          <Link href="#" sx={{ 
-            color: '#8ab4f8',
-            textDecoration: 'none',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}>
-            {' '}Learn more
-          </Link>
+          Built for Spotter technical challenge
         </Typography>
-      </Container>
+
+        <Typography sx={{
+          color: 'text.secondary',
+          fontSize: 11,
+          textAlign: 'center'
+        }}>
+          Displayed currencies may differ from the currencies used to purchase flights.
+        </Typography>
+      </Box>
     </Box>
   );
 };

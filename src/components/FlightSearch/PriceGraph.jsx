@@ -1,83 +1,151 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Box, Typography } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
 import { useMemo } from 'react';
 import { useFlightContext } from '../../context/FlightContext';
+import { calculatePriceStats } from '../../utils/priceUtils';
+import { formatStops } from '../../utils/formatters';
 
 const PriceGraph = () => {
   const { filteredFlights } = useFlightContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Preparar datos para el gráfico usando filteredFlights
   const chartData = useMemo(() => {
-    return filteredFlights
-      .map((flight, index) => ({
-        id: flight.id,
-        name: `${flight.airline} ${flight.stops > 0 ? `${flight.stops}s` : 'D'}`,
-        price: flight.price,
-        airline: flight.airline,
-        stops: flight.stops,
-      }))
-      .sort((a, b) => a.price - b.price);
+    const sorted = [...filteredFlights].sort((a, b) => a.price - b.price);
+    return sorted.map((flight) => ({
+      id: flight.id,
+      name: flight.airlineCode,
+      price: flight.price,
+      airline: flight.airline,
+      stops: flight.stops,
+    }));
   }, [filteredFlights]);
 
-  if (chartData.length === 0) {
+  const priceStats = useMemo(() => calculatePriceStats(filteredFlights), [filteredFlights]);
+
+  if (chartData.length === 0 || !priceStats) {
+    return null;
+  }
+
+  if (isMobile) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center', color: '#9aa0a6' }}>
-        <Typography>No hay datos para mostrar el gráfico</Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          py: 1.5,
+          px: 2,
+          bgcolor: 'background.paper',
+          borderBottom: 1,
+          borderColor: 'divider'
+        }}
+        role="region"
+        aria-label="Price summary"
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography sx={{ color: theme.palette.mode === 'dark' ? 'success.light' : 'success.main', fontSize: 16, fontWeight: 700 }} aria-label={`Lowest price: $${priceStats.min}`}>
+            ${priceStats.min}
+          </Typography>
+          <Typography sx={{ color: 'text.secondary', fontSize: 10 }} aria-hidden="true">Low</Typography>
+        </Box>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography sx={{ fontSize: 16, fontWeight: 700 }} aria-label={`Average price: $${priceStats.avg}`}>
+            ${priceStats.avg}
+          </Typography>
+          <Typography sx={{ color: 'text.secondary', fontSize: 10 }} aria-hidden="true">Avg</Typography>
+        </Box>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography sx={{ color: theme.palette.mode === 'dark' ? 'error.light' : 'error.main', fontSize: 16, fontWeight: 700 }} aria-label={`Highest price: $${priceStats.max}`}>
+            ${priceStats.max}
+          </Typography>
+          <Typography sx={{ color: 'text.secondary', fontSize: 10 }} aria-hidden="true">High</Typography>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ 
-      width: '100%', 
-      height: 300, 
-      mt: 2, 
-      mb: 3,
-      backgroundColor: '#303134',
-      p: 2,
-      borderRadius: '8px',
-      border: '1px solid #3c4043'
-    }}>
-      <Typography variant="h6" sx={{ mb: 2, color: '#e8eaed' }}>
-        Price Trends - Live Updates ({chartData.length} flights)
-      </Typography>
-      <ResponsiveContainer width="100%" height={250}>
-        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#3c4043" />
-          <XAxis 
-            dataKey="name" 
-            stroke="#9aa0a6"
-            style={{ fontSize: '12px' }}
+    <Box
+      sx={{
+        width: '100%',
+        mb: 3,
+        bgcolor: 'background.paper',
+        p: 2.5,
+        borderRadius: 2,
+        border: 1,
+        borderColor: 'divider'
+      }}
+      role="region"
+      aria-label="Price overview chart"
+    >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography component="h2" variant="h6" sx={{ color: 'text.primary' }}>
+          Price Overview
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 3 }} aria-label="Price statistics">
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography sx={{ color: theme.palette.mode === 'dark' ? 'success.light' : 'success.main', fontSize: 18, fontWeight: 600 }} aria-label={`Lowest price: $${priceStats.min}`}>
+              ${priceStats.min}
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', fontSize: 12 }} aria-hidden="true">Lowest</Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography sx={{ color: 'text.primary', fontSize: 18, fontWeight: 600 }} aria-label={`Average price: $${priceStats.avg}`}>
+              ${priceStats.avg}
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', fontSize: 12 }} aria-hidden="true">Average</Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography sx={{ color: theme.palette.mode === 'dark' ? 'error.light' : 'error.main', fontSize: 18, fontWeight: 600 }} aria-label={`Highest price: $${priceStats.max}`}>
+              ${priceStats.max}
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', fontSize: 12 }} aria-hidden="true">Highest</Typography>
+          </Box>
+        </Box>
+      </Box>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart data={chartData} margin={{ left: 0, right: 20, top: 10, bottom: 5 }}>
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
+            axisLine={{ stroke: theme.palette.divider }}
+            tickLine={false}
           />
-          <YAxis 
-            stroke="#9aa0a6"
-            style={{ fontSize: '12px' }}
-            label={{ value: 'USD', angle: -90, position: 'insideLeft' }}
+          <YAxis
+            tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(value) => `$${value}`}
           />
-          <Tooltip 
+          <Tooltip
             contentStyle={{
-              backgroundColor: '#202124',
-              border: '1px solid #3c4043',
-              borderRadius: '4px',
-              color: '#e8eaed'
+              backgroundColor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: 8,
+              fontSize: 13,
+              padding: '10px 14px'
             }}
-            formatter={(value) => `$${value}`}
-            labelFormatter={(label) => `Flight: ${label}`}
+            formatter={(value) => [`$${value.toLocaleString()}`, 'Price']}
+            labelFormatter={(label, payload) => {
+              if (payload && payload[0]) {
+                const data = payload[0].payload;
+                return `${data.airline} (${data.stops === 0 ? 'Direct' : formatStops(data.stops)})`;
+              }
+              return label;
+            }}
           />
-          <Legend 
-            wrapperStyle={{ color: '#9aa0a6' }}
-          />
-          <Line 
-            type="monotone" 
-            dataKey="price" 
-            stroke="#8ab4f8" 
-            strokeWidth={2}
-            dot={{ fill: '#8ab4f8', r: 4 }}
-            activeDot={{ r: 6 }}
-            name="Price (USD)"
-            isAnimationActive={true}
-          />
-        </LineChart>
+          <Bar dataKey="price" radius={[4, 4, 0, 0]}>
+            {chartData.map((entry, index) => (
+              <Cell
+                key={entry.id}
+                fill={entry.price === priceStats.min
+                  ? theme.palette.success.main
+                  : theme.palette.primary.main}
+                fillOpacity={entry.price === priceStats.min ? 1 : 0.7}
+              />
+            ))}
+          </Bar>
+        </BarChart>
       </ResponsiveContainer>
     </Box>
   );

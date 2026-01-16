@@ -1,23 +1,45 @@
-import { useState, useMemo } from 'react';
+import { useMemo, lazy, Suspense } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, Box } from '@mui/material';
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import Skeleton from '@mui/material/Skeleton';
 import Header from './components/Layout/Header';
 import FlightSearch from './components/FlightSearch/FlightSearch';
-import FlightResults from './components/FlightSearch/FlightResults';
 import Footer from './components/Layout/Footer';
+import OnboardingTour from './components/Onboarding/OnboardingTour';
 import { FlightProvider } from './context/FlightContext';
 import { ThemeModeProvider, useThemeMode } from './context/ThemeContext';
+import { OnboardingProvider } from './context/OnboardingContext';
+
+const FlightResults = lazy(() => import('./components/FlightSearch/FlightResults'));
 
 function AppContent() {
   const { mode } = useThemeMode();
-  const [searchTrigger, setSearchTrigger] = useState(0);
 
   const theme = useMemo(() => createTheme({
     palette: {
       mode: mode,
       primary: {
-        main: '#8ab4f8',
+        main: '#1a73e8',
+        light: '#4285f4',
+        dark: '#1557b0',
+        contrastText: '#ffffff',
+      },
+      success: {
+        main: '#137333',
+        light: '#81c784',
+        dark: '#0d5626',
+      },
+      error: {
+        main: '#c5221f',
+        light: '#ef9a9a',
+        dark: '#a31815',
+      },
+      warning: {
+        main: '#8a5200',
+        light: '#ffb74d',
+        dark: '#6b4000',
       },
       ...(mode === 'dark' ? {
         background: {
@@ -26,7 +48,7 @@ function AppContent() {
         },
         text: {
           primary: '#e8eaed',
-          secondary: '#9aa0a6',
+          secondary: '#bdc1c6',
         },
         divider: '#3c4043',
       } : {
@@ -42,36 +64,30 @@ function AppContent() {
       }),
     },
     typography: {
-      fontFamily: [
-        'Roboto',
-        'Arial',
-        'sans-serif',
-      ].join(','),
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       h6: {
-        fontFamily: 'Roboto, Arial, sans-serif',
-        fontWeight: 400,
+        fontWeight: 500,
       },
       body1: {
-        fontFamily: 'Roboto, Arial, sans-serif',
+        fontWeight: 400,
       },
       body2: {
-        fontFamily: 'Roboto, Arial, sans-serif',
+        fontWeight: 400,
       },
     },
     components: {
       MuiCard: {
         styleOverrides: {
-          root: {
+          root: ({ theme }) => ({
             boxShadow: 'none',
-            border: mode === 'dark' ? '1px solid #3c4043' : '1px solid #dadce0',
-          },
+            border: `1px solid ${theme.palette.divider}`,
+          }),
         },
       },
       MuiButton: {
         styleOverrides: {
           root: {
             textTransform: 'none',
-            fontFamily: 'Roboto, Arial, sans-serif',
           },
         },
       },
@@ -79,7 +95,28 @@ function AppContent() {
         styleOverrides: {
           root: {
             textTransform: 'none',
-            fontFamily: 'Roboto, Arial, sans-serif',
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            '& input[type="date"]': {
+              colorScheme: theme.palette.mode === 'dark' ? 'dark' : 'light',
+            },
+            '& input[type="date"]::-webkit-calendar-picker-indicator': {
+              filter: theme.palette.mode === 'dark' ? 'invert(1)' : 'none',
+              cursor: 'pointer',
+            },
+          }),
+        },
+      },
+      MuiInputAdornment: {
+        styleOverrides: {
+          root: {
+            '& .MuiSvgIcon-root': {
+              pointerEvents: 'none',
+            },
           },
         },
       },
@@ -95,30 +132,37 @@ function AppContent() {
     },
   }), [mode]);
 
-  const handleSearch = (searchParams) => {
-    setSearchTrigger(prev => prev + 1);
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <FlightProvider>
-        <Box sx={{ 
-          minHeight: '100vh', 
-          display: 'flex', 
-          flexDirection: 'column',
-          backgroundColor: mode === 'dark' ? '#202124' : '#f5f5f5'
-        }}>
-          <Header />
-          <Container maxWidth="lg" sx={{ py: 3, flex: 1 }}>
-            <Box sx={{ mb: 3 }}>
-              <FlightSearch onSearch={handleSearch} />
+      <OnboardingProvider>
+        <FlightProvider>
+          <Box sx={{
+            minHeight: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            bgcolor: 'background.default'
+          }}>
+            <Header />
+            <Box component="main" sx={{ flex: 1 }}>
+              <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}>
+                <FlightSearch />
+              </Container>
+              <Suspense fallback={
+                <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3, py: 4 }}>
+                  <Skeleton variant="rectangular" height={120} sx={{ mb: 3, borderRadius: 2 }} />
+                  <Skeleton variant="rectangular" height={200} sx={{ mb: 3, borderRadius: 2 }} />
+                  <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} />
+                </Box>
+              }>
+                <FlightResults />
+              </Suspense>
             </Box>
-            <FlightResults shouldSearch={searchTrigger} />
-          </Container>
-          <Footer />
-        </Box>
-      </FlightProvider>
+            <Footer />
+            <OnboardingTour />
+          </Box>
+        </FlightProvider>
+      </OnboardingProvider>
     </ThemeProvider>
   );
 }
